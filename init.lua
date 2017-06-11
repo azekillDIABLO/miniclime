@@ -4,7 +4,8 @@
 --fixed variables
 local int = 0
 local wind = 0
-local yes_or_no = 1
+local yes_or_no_loop_size = 100
+local yes_or_no = math.random(yes_or_no_loop_size)
 
 --active weather
 minetest.register_globalstep(function(time_of_day)
@@ -25,6 +26,12 @@ minetest.register_globalstep(function(time_of_day)
 			
 			yes_or_no = yes_or_no+math.random(-10,10)
 
+			if yes_or_no > yes_or_no_loop_size then
+				yes_or_no = yes_or_no-(2*yes_or_no_loop_size)
+			elseif yes_or_no < -yes_or_no_loop_size
+				yes_or_no = yes_or_no+(2*yes_or_no_loop_size)
+			end
+			
 			if yes_or_no > 50 or yes_or_no < -50 then
 			
 				int = 0
