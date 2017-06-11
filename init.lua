@@ -30,15 +30,15 @@ minetest.register_globalstep(function(time_of_day)
 				int = 0
 				for _, player in ipairs(minetest.get_connected_players()) do
 					local pos = player:getpos()
-
-					if pos.y > 0 then
+					local nodepos = {x = pos.x+math.random(-10,10), y=pos.y+10, z = pos.z+math.random(-10,10)}
+					if nodepos.y > 0 then
 						local time_of_day = minetest.get_timeofday()*24000
 						
 						if time_of_day < 17000 and time_of_day > 7000 then
 
 	--day weather =============================================================================================================
 							for i=0,60,1 do
-								local node = minetest.get_node({x=pos.x, y=pos.y-i, z=pos.z})
+								local node = minetest.get_node({x=nodepos.x, y=nodepos.y-i, z=nodepos.z})
 								--rain on grass and rainforest-litter
 								if node.name == "default:dirt_with_rainforest_litter" or node.name == "default:dirt_with_grass" then
 									minetest.add_particlespawner({
@@ -110,7 +110,7 @@ minetest.register_globalstep(function(time_of_day)
 	--night weather =============================================================================================================
 
 							for i=0,60,1 do
-								local node = minetest.get_node({x=pos.x, y=pos.y-i, z=pos.z})
+								local node = minetest.get_node({x=nodepos.x, y=nodepos.y-i, z=nodepos.z})
 								--fog on grass
 								if pos.y < 32 then
 									if node.name == "default:dirt_with_grass" or node.name == "default:dirt_with_dry_grass" then
