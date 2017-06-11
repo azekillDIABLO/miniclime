@@ -28,7 +28,7 @@ minetest.register_globalstep(function(time_of_day)
 
 			if yes_or_no > yes_or_no_loop_size then
 				yes_or_no = yes_or_no-(2*yes_or_no_loop_size)
-			elseif yes_or_no < -yes_or_no_loop_size
+			elseif yes_or_no < -yes_or_no_loop_size then
 				yes_or_no = yes_or_no+(2*yes_or_no_loop_size)
 			end
 			
