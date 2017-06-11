@@ -2,10 +2,9 @@
 --W.I.P. version
 
 --fixed variables
-int = 0
-wind = 0
-node = ""
-yes_or_no = 1
+local int = 0
+local wind = 0
+local yes_or_no = 1
 
 --active weather
 minetest.register_globalstep(function(time_of_day)
@@ -39,7 +38,7 @@ minetest.register_globalstep(function(time_of_day)
 
 	--day weather =============================================================================================================
 							for i=0,60,1 do
-								node = minetest.get_node({x=pos.x, y=pos.y-i, z=pos.z})
+								local node = minetest.get_node({x=pos.x, y=pos.y-i, z=pos.z})
 								--rain on grass and rainforest-litter
 								if node.name == "default:dirt_with_rainforest_litter" or node.name == "default:dirt_with_grass" then
 									minetest.add_particlespawner({
@@ -111,7 +110,7 @@ minetest.register_globalstep(function(time_of_day)
 	--night weather =============================================================================================================
 
 							for i=0,60,1 do
-								node = minetest.get_node({x=pos.x, y=pos.y-i, z=pos.z})
+								local node = minetest.get_node({x=pos.x, y=pos.y-i, z=pos.z})
 								--fog on grass
 								if pos.y < 32 then
 									if node.name == "default:dirt_with_grass" or node.name == "default:dirt_with_dry_grass" then
