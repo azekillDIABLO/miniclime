@@ -3,26 +3,26 @@
 
 --fixed variables
 local int = 0
+local slow_timer = 0
 local wind = 0
-local yes_or_no_loop_size = 100
-local yes_or_no = math.random(yes_or_no_loop_size)
+local weather_force = 10
 
 --lightning mod
 lightning.auto = false
-lightning.interval_low = 1
-lightning.interval_high = 4
+lightning.interval_low = 8
+lightning.interval_high = 14
 
 
 local function rain(pos)
 	minetest.add_particlespawner({
-		amount = 24,
+		amount = 204,
 		time = 0.5,
 		minpos = {x = pos.x-20, y = pos.y+15, z = pos.z-20},
 		maxpos = {x = pos.x+20, y = pos.y+25, z = pos.z+20},
-		minvel = {x = 0, y = -1, z = 0},
-		maxvel = {x = 0, y = -1, z = 0},
-		minacc = {x = wind, y = -10, z = wind},
-		maxacc = {x = wind, y = -10, z = wind},
+		minvel = {x = 0, y = -6, z = 0},
+		maxvel = {x = 0, y = -6, z = 0},
+		minacc = {x = wind, y = -38, z = wind},
+		maxacc = {x = wind, y = -38, z = wind},
 		minexptime = 2,
 		maxexptime = 3.5,
 		minsize = 5,
@@ -120,18 +120,18 @@ end
 
 local function thunder(pos)
 	minetest.add_particlespawner({
-		amount = 24,
+		amount = 240,
 		time = 0.5,
 		minpos = {x = pos.x-20, y = pos.y+15, z = pos.z-20},
 		maxpos = {x = pos.x+20, y = pos.y+25, z = pos.z+20},
-		minvel = {x = 0, y = -1, z = 0},
-		maxvel = {x = 0, y = -1, z = 0},
-		minacc = {x = wind, y = -10, z = wind},
-		maxacc = {x = wind, y = -10, z = wind},
+		minvel = {x = 0, y = -10, z = 0},
+		maxvel = {x = 0, y = -10, z = 0},
+		minacc = {x = wind, y = -38, z = wind},
+		maxacc = {x = wind, y = -38, z = wind},
 		minexptime = 2.5,
 		maxexptime = 3.5,
-		minsize = 7,
-		maxsize = 9,
+		minsize = 8,
+		maxsize = 10,
 		texture = "miniclime_rain.png",
 		vertical = true,
 		collisiondetection = true,
@@ -144,6 +144,7 @@ end
 minetest.register_globalstep(function(time_of_day)
 	--variable change
 	int = int+0.1
+	slow_timer = int
 	wind = wind+math.random(-0.1,0.1)
 	
 	if wind > 1 then
@@ -154,19 +155,20 @@ minetest.register_globalstep(function(time_of_day)
 		wind = wind+0.2
 	end
 	
-	--weather change
-	if int > 2 then
-		
-		yes_or_no = yes_or_no+math.random(-10,10)
+	if slow_timer == 300 then
+		slow_timer = 0
+		weather_force = math.random(0,100)
 
-		if yes_or_no > yes_or_no_loop_size then
-			yes_or_no = yes_or_no-(2*yes_or_no_loop_size)
-		elseif yes_or_no < -yes_or_no_loop_size then
-			yes_or_no = yes_or_no+(2*yes_or_no_loop_size)
+		if weather_force > 100 then
+			weather_force = 100
+		elseif weather_force < 0 then
+			weather_force = 0
 		end
+	end
 		
-		if yes_or_no > 63 or yes_or_no < -63 then
-		
+	--weather change
+	if int > 3 then
+		if weather_force > 63 then
 			int = 0
 			for _, player in ipairs(minetest.get_connected_players()) do
 				local pos = player:getpos()
@@ -183,6 +185,7 @@ minetest.register_globalstep(function(time_of_day)
 							--rain on grass and rainforest-litter
 							if node.name == "default:dirt_with_rainforest_litter" or node.name == "default:dirt_with_grass" then
 								rain(pos)
+								minetest.sound_play("rain_drop", {pos = pos, gain = 0.2, max_hear_distance = 10})
 							end 
 							
 							--snow on snow (obliviously)
@@ -193,6 +196,7 @@ minetest.register_globalstep(function(time_of_day)
 							--sandstorm on desert sand
 							if node.name == "default:desert_sand" or node.name == "default:dirt_with_dry_grass" then
 								sandstorm(pos)
+								minetest.sound_play("wind", {pos = pos, gain = 0.1, max_hear_distance = 10})
 							end
 						end
 --night weather =============================================================================================================
@@ -203,17 +207,21 @@ minetest.register_globalstep(function(time_of_day)
 							if pos.y < 32 or pos.y < 312 then
 								if node.name == "default:air" or node.name == "default:water_source" then
 									fog(pos)
+									minetest.sound_play("light_rain_drop", {pos = pos, gain = 0.2, max_hear_distance = 10})
 								end
 							end
 						
 							--blizzard
 							if node.name == "default:snow" or node.name == "default:dirt_with_snow" or node.name == "default:snowblock" then
 								blizzard(pos)
+								minetest.sound_play("wind", {pos = pos, gain = 0.1, max_hear_distance = 10})
 							end
 						
 							--thunderstorm on grass and rainforest-litter
 							if node.name == "default:dirt_with_dry_grass" or node.name == "default:dirt_with_grass" then
 								thunder(pos)
+								minetest.sound_play("heavy_rain_drop", {pos = pos, gain = 0.2, max_hear_distance = 10})
+								minetest.sound_play("wind", {pos = pos, gain = 0.1, max_hear_distance = 10})
 							end
 						end
 					end
@@ -225,4 +233,18 @@ minetest.register_globalstep(function(time_of_day)
 	end
 end)
 
-
+minetest.register_chatcommand("roll_weather", {
+	params = "<value>",
+	privs = {settime=true},
+	description = "Allow parameting weather.",
+	func = function(name, param)
+		local value = tonumber(param)
+		if value == nil then
+			weather_force = math.random(0, 100)
+			minetest.debug("[miniclime] weather_force set to " .. weather_force)
+		else
+			weather_force = value
+			minetest.debug("[miniclime] weather_force set to " .. weather_force)
+		end
+	end,
+})
